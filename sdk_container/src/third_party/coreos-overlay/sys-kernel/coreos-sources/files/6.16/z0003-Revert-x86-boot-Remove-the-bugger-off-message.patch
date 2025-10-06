@@ -1,31 +1,26 @@
 From 9f34a9ffe5b94aee93baa5762719546e0bebc28d Mon Sep 17 00:00:00 2001
 From: Kai Lueke <kailuke@microsoft.com>
 Date: Fri, 15 Mar 2024 11:49:50 +0100
-Subject: [PATCH] Revert "x86/boot: Remove the 'bugger off' message"
+Subject: [PATCH] x86/boot: Add space for dm-verity hash storage
 
-This reverts commit 768171d7ebbce005210e1cf8456f043304805c15 because for
-now this is still needed to store the dm-verity hash.
+Add space in the boot sector for storing dm-verity hash data, which is
+needed for Flatcar's verified boot implementation. This preserves the
+functionality that was available in older kernels but adapts it to the
+new boot sector layout in 6.16.
 ---
- arch/x86/boot/header.S | 49 ++++++++++++++++++++++++++++++++++++++++++
- arch/x86/boot/setup.ld |  7 +++---
- 2 files changed, 52 insertions(+), 4 deletions(-)
+ arch/x86/boot/header.S | 43 +++++++++++++++++++++++++++++++++++++++++++
+ arch/x86/boot/setup.ld |  7 ++++---
+ 2 files changed, 47 insertions(+), 3 deletions(-)
 
-diff --git a/arch/x86/boot/header.S b/arch/x86/boot/header.S
-index a1bbedd989e4..c7624caf6840 100644
 --- a/arch/x86/boot/header.S
 +++ b/arch/x86/boot/header.S
-@@ -41,15 +41,64 @@ SYSSEG		= 0x1000		/* historical load address >> 4 */
- 
+@@ -41,6 +41,49 @@ SYSSEG		= 0x1000		/* historical load address >> 4 */
+
  	.code16
  	.section ".bstext", "ax"
 +
 +	.global bootsect_start
 +bootsect_start:
- #ifdef CONFIG_EFI_STUB
- 	# "MZ", MS-DOS header
- 	.word	MZ_MAGIC
-+#endif
-+
 +	# Normalize the start address
 +	ljmp	$BOOTSEG, $start2
 +
@@ -59,15 +54,6 @@ index a1bbedd989e4..c7624caf6840 100644
 +	# invoke the BIOS reset code...
 +	ljmp	$0xf000,$0xfff0
 +
-+#ifdef CONFIG_EFI_STUB
- 	.org	0x38
- 	#
- 	# Offset to the PE header.
- 	#
- 	.long	LINUX_PE_MAGIC
- 	.long	pe_header
-+#endif /* CONFIG_EFI_STUB */
-+
 +	.section ".bsdata", "a"
 +bugger_off_msg:
 +	.ascii	"Use a boot loader.\r\n"
@@ -75,29 +61,24 @@ index a1bbedd989e4..c7624caf6840 100644
 +	.ascii	"Remove disk and press any key to reboot...\r\n"
 +	.byte	0
 +
-+#ifdef CONFIG_EFI_STUB
- pe_header:
- 	.long	PE_MAGIC
- 
-diff --git a/arch/x86/boot/setup.ld b/arch/x86/boot/setup.ld
-index 3a2d1360abb0..c3e354d312d0 100644
+ #ifdef CONFIG_EFI_STUB
+ 	# "MZ", MS-DOS header
+ 	.word	IMAGE_DOS_SIGNATURE
 --- a/arch/x86/boot/setup.ld
 +++ b/arch/x86/boot/setup.ld
-@@ -10,11 +10,10 @@ ENTRY(_start)
+@@ -11,10 +11,11 @@ ENTRY(_start)
  SECTIONS
  {
  	. = 0;
--	.bstext	: {
+-	.bstext : {
 -		*(.bstext)
 -		. = 495;
 -	} =0xffffffff
 +	.bstext		: { *(.bstext) }
 +	.bsdata		: { *(.bsdata) }
- 
++
 +	. = 495;
++	. = ALIGN(1);
+
  	.header		: { *(.header) }
  	.entrytext	: { *(.entrytext) }
- 	.inittext	: { *(.inittext) }
--- 
-2.44.0
-

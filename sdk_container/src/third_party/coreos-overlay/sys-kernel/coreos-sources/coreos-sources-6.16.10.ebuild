@@ -37,6 +37,7 @@ IUSE=""
 # Updated patches for 6.16 - some patches may no longer be needed
 UNIPATCH_LIST="
 	${PATCH_DIR}/z0002-pahole-support-reproducible-builds.patch \
+	${PATCH_DIR}/z0003-Revert-x86-boot-Remove-the-bugger-off-message.patch \
 	${PATCH_DIR}/z0004-efi-add-an-efi_secure_boot-flag-to-indicate-secure-b.patch \
 	${PATCH_DIR}/z0005-efi-lock-down-the-kernel-if-booted-in-secure-boot-mo.patch \
 	${PATCH_DIR}/z0006-mtd-disable-slram-and-phram-when-locked-down.patch \
