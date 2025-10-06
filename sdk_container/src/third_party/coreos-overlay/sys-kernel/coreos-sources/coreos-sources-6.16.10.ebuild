@@ -34,13 +34,15 @@ IUSE=""
 # applied _after_ a potential patch-${KV}.patch file, present when building a
 # patchlevel revision.  We mustn't apply our patches first, it fails when the
 # local patches overlap with the upstream patch.
+# Updated patches for 6.16 - some patches may no longer be needed
 UNIPATCH_LIST="
-	${PATCH_DIR}/z0001-kbuild-derive-relative-path-for-srctree-from-CURDIR.patch \
 	${PATCH_DIR}/z0002-pahole-support-reproducible-builds.patch \
-	${PATCH_DIR}/z0003-Revert-x86-boot-Remove-the-bugger-off-message.patch \
 	${PATCH_DIR}/z0004-efi-add-an-efi_secure_boot-flag-to-indicate-secure-b.patch \
 	${PATCH_DIR}/z0005-efi-lock-down-the-kernel-if-booted-in-secure-boot-mo.patch \
 	${PATCH_DIR}/z0006-mtd-disable-slram-and-phram-when-locked-down.patch \
 	${PATCH_DIR}/z0007-arm64-add-kernel-config-option-to-lock-down-when.patch \
 	${PATCH_DIR}/z0008-tools-hv-fix-cross-compilation-for-ARM64.patch \
 "
+# Disabled patches that need analysis/updating for 6.16:
+# z0001-kbuild-derive-relative-path-for-srctree-from-CURDIR.patch - build system changed
+# z0003-Revert-x86-boot-Remove-the-bugger-off-message.patch - boot header changed

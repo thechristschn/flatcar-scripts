@@ -13,14 +13,13 @@ index 2d6e5ed9081e..b2f88b0fcf37 100644
 +++ b/scripts/Makefile.btf
 @@ -23,6 +23,9 @@ else
  # Switch to using --btf_features for v1.26 and later.
- pahole-flags-$(call test-ge, $(pahole-ver), 126)  = -j --btf_features=encode_force,var,float,enum64,decl_tag,type_tag,optimized_func,consistent_func
- 
-+# Support reproducible builds.
-+pahole-flags-$(call test-ge, $(pahole-ver), 127)  = -j --btf_features=encode_force,var,float,enum64,decl_tag,type_tag,optimized_func,consistent_func,reproducible_build
-+
- endif
- 
- pahole-flags-$(CONFIG_PAHOLE_HAS_LANG_EXCLUDE)		+= --lang_exclude=rust
--- 
-2.34.1
+ pahole-flags-$(call test-ge, $(pahole-ver), 126)  = -j$(JOBS) --btf_features=encode_force,var,float,enum64,decl_tag,type_tag,optimized_func,consistent_func,decl_tag_kfuncs
 
++# Support reproducible builds.
++pahole-flags-$(call test-ge, $(pahole-ver), 127) += --btf_features=reproducible_build
++
+ pahole-flags-$(call test-ge, $(pahole-ver), 130) += --btf_features=attributes
+
+ ifneq ($(KBUILD_EXTMOD),)
+--
+2.34.1
